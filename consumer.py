@@ -1,10 +1,9 @@
 from kafka import KafkaConsumer
 import json
 import pandas as pd
-import dask.dataframe as dd
-import datetime
 
-KAFKA_TOPIC = "weather_data"
+KAFKA_TOPIC = "secop_data"
+
 consumer = KafkaConsumer(
     KAFKA_TOPIC,
     bootstrap_servers="localhost:9092",
@@ -14,14 +13,11 @@ consumer = KafkaConsumer(
 data_list = []
 for message in consumer:
     data = message.value
-    temp_data = data["hourly"]["temperature_2m"]
-    df = pd.DataFrame(temp_data, columns=["temperature"])
-    df["timestamp"] = pd.to_datetime(datetime.datetime.now())
+    df = pd.DataFrame(data)  # Convertir a DataFrame
     data_list.append(df)
 
-    if len(data_list) >= 5:  # Procesa cada 5 mensajes
-        ddf = dd.from_pandas(pd.concat(data_list), npartitions=2)
-        result = ddf.groupby("timestamp").mean().compute()
-        result.to_parquet("processed_weather.parquet")
-        print("Datos procesados y guardados")
-        data_list = []
+    if len(data_list) >= 5:  # Procesar cada 5 lotes de datos
+        final_df = pd.concat(data_list)
+        final_df.to_csv("secop_data.csv", index=False)  # Guardar en CSV
+        print("Datos de SECOP II procesados y guardados.")
+        data_list = []  # Limpiar lista para el siguiente batch

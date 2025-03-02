@@ -10,7 +10,7 @@ packages = []  # ← Agrega esta línea aquí
 [tool.poetry.dependencies]
 python = "^3.10"
 kafka-python = "^2.0.2"
-dask = "^2024.1.1"
+dask = {extras = ["dataframe"], version = "^2025.2.0"}
 pandas = "^2.1.4"
 matplotlib = "^3.8.0"
 requests = "^2.31.0"

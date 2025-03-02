@@ -3,8 +3,9 @@ import requests
 import json
 import time
 
-API_URL = "https://api.open-meteo.com/v1/forecast?latitude=4.6097&longitude=-74.0817&hourly=temperature_2m"
-KAFKA_TOPIC = "weather_data"
+# API de SECOP II
+SECOP_API_URL = "https://www.datos.gov.co/resource/p6dx-8zbt.json"
+KAFKA_TOPIC = "secop_data"
 
 producer = KafkaProducer(
     bootstrap_servers="localhost:9092",
@@ -12,9 +13,12 @@ producer = KafkaProducer(
 )
 
 while True:
-    response = requests.get(API_URL)
+    response = requests.get(SECOP_API_URL)
     if response.status_code == 200:
         data = response.json()
         producer.send(KAFKA_TOPIC, data)
-        print("Datos enviados a Kafka:", data)
-    time.sleep(10)  # Envía datos cada 10 segundos
+        print("Datos de SECOP II enviados a Kafka:", data[:2])  # Solo mostramos los primeros 2 registros
+    else:
+        print("Error al obtener datos de SECOP II:", response.status_code)
+
+    time.sleep(10)  # Enviar datos cada 10 segundos
